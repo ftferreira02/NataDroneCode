@@ -1,18 +1,17 @@
 from ultralytics import YOLO
+from pathlib import Path
 
-# Ultralytics classification expects:
-# data = path to a folder with 'train' and 'val' subfolders, each containing class subfolders.
-DATA = "data_work/s3r_png"
-MODEL = "yolov8n-cls.pt"   # nano classification backbone (fast)
+# Use detection model (not classification)
+model = YOLO("yolov8n.pt")
 
-model = YOLO(MODEL)
+# Absolute path to your data.yaml
+data_path = str(Path("data_work/yolo/data.yaml").resolve())
+
 model.train(
-    data=DATA,
-    epochs=30,         # bump to ~50 if you have time
-    imgsz=224,         # 224 or 320; 224 is faster
-    batch=32,          # adjust to RAM/CPU
-    lr0=0.001,
-    device='cpu',      # or '0' if you have a CUDA GPU
-    project='models',
-    name='yolo_cls_s3r'
+    data=data_path,
+    epochs=20,
+    imgsz=640,
+    batch=16,
+    project="models",
+    name="yolo_det_s3r"
 )

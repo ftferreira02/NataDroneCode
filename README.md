@@ -74,11 +74,35 @@ Saves sidecar .rois.txt files with bounding boxes.
 
 Delete bad lines = human-in-the-loop correction.
 
-| Script                           | Purpose                                                                                                                                           |
-| -------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **00_convert_s3r_npy_to_png.py** | Converts S3R `.npy` → `.png` images, builds train/val split.                                                                                      |
-| **02_auto_label_rois.py**        | Auto-labels time–frequency regions (ROIs) in spectrograms and saves bounding boxes + previews. Demonstrates automated labeling + HITL correction. |
-| **04_train_yolo_cls.py**         | Trains a YOLOv8 classification model on spectrogram PNGs.                                                                                         |
-| **05_osr_cls_threshold.py**      | Builds open-set recognition (OSR) prototypes + distance threshold from embeddings.                                                                |
-| **demo_cls_osr.py**              | Inference script: classifies a spectrogram, or rejects as `UNKNOWN` if too far from known prototypes.                                             |
-| **01_make_spectrograms.py**      | (Unused for S3R) Converts raw IQ/CSV/MAT signals to spectrograms. Useful if new raw RF data arrives.                                              |
+7. Convert ROIs → YOLO detection dataset
+python scripts/03_convert_rois_to_yolo.py
+
+
+Creates a full YOLO detection dataset:
+
+data_work/yolo/
+  images/train/*.png
+  labels/train/*.txt
+  images/val/*.png
+  labels/val/*.txt
+  data.yaml
+
+
+Each .txt contains normalized YOLO bounding boxes from the .rois.txt.
+
+8. Train YOLO detection
+python scripts/04_train_yolo.py
+
+
+Trains a YOLOv8n detection model on ROI bounding boxes.
+
+| Script                           | Purpose                                                                                                                        |
+| -------------------------------- | ------------------------------------------------------------------------------------------------------------------------------ |
+| **00_convert_s3r_npy_to_png.py** | Converts S3R `.npy` → `.png` images, builds train/val split.                                                                   |
+| **02_auto_label_rois.py**        | Auto-labels time–frequency regions (ROIs) in spectrograms and saves bounding boxes + previews. Demonstrates auto-label + HITL. |
+| **03_convert_rois_to_yolo.py**   | Converts `.rois.txt` ROI boxes into YOLO detection dataset (images + labels + `data.yaml`).                                    |
+| **04_train_yolo_cls.py**         | Trains a YOLOv8 classification model on spectrogram PNGs.                                                                      |
+| **04_train_yolo.py**             | Trains a YOLOv8 detection model using ROI-based YOLO dataset.                                                                  |
+| **05_osr_cls_threshold.py**      | Builds open-set recognition (OSR) prototypes + distance threshold from embeddings.                                             |
+| **demo_cls_osr.py**              | Inference script: classifies a spectrogram, or rejects as `UNKNOWN` if too far from known prototypes.                          |
+| **01_make_spectrograms.py**      | (Unused for S3R) Converts raw IQ/CSV/MAT signals to spectrograms. Useful if new raw RF data arrives.                           |
